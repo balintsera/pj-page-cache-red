@@ -5,17 +5,25 @@ use RedisPageCache\CacheManagerFactory;
 use RedisPageCache\Service\GzipCompressor;
 use RedisPageCache\Service\WPCompat;
 use RedisPageCache\Model\KeyFactory;
-
-
 use RedisClient\ClientFactory;
+
+use Prophecy\Argument;
 
 describe('CacheManager', function () {
     beforeEach(function () {
         $this->cacheManager = CacheManagerFactory::getManager();
-        $this->redisClient =  $redisClient = ClientFactory::create([
+        $this->mocking = true;
+        $this->redisClient = ClientFactory::create([
             'server' => '127.0.0.1:6379', // or 'unix:///tmp/redis.sock'
             'timeout' => 2,
         ]);
+
+        // Mocking redis
+        if ($this->mocking) {
+            $this->redisMock = $this->getProphet()->prophesize('RedisClient\Client\Version\RedisClient3x2');
+            $this->redisClient = $this->redisMock->reveal();
+        }
+
     });
 
     it('should accept redis client as dependency', function () {
@@ -79,6 +87,13 @@ describe('CacheManager', function () {
         $cacheWriter->add();
 
         $cacheReader = new \RedisPageCache\Service\CacheReader($request, $redis);
+        if ($this->mocking) {
+            $key = $cacheWriter->getKey();
+            error_log('mocking with key: '.$key->get(), 4);
+            $this->redisMock
+                ->mget(Argument::exact(['pjc-4ebad7e867ffa267c3c91ed43371aa2d', 'pjc-lock-4ebad7e867ffa267c3c91ed43371aa2d']))
+                ->willReturn([base64_encode(serialize($cachedPage)), false]);
+        }
         $result = $cacheReader->checkRequest();
 
         assert(is_array($result), "result is not an array");
@@ -109,13 +124,24 @@ describe('CacheManager', function () {
         $redis->del($key);
         $this->cacheManager->setFcgiRegenerate(false);
         $this->cacheManager->outputBuffer("example content");
-  
+        $compressor = new GzipCompressor();
+        if ($this->mocking) {
+            $cachedPage = new \RedisPageCache\Model\CachedPage($compressor->compress("example content"), 200);
+
+            $this->redisMock
+                ->mget(Argument::exact(['pjc-5f585198c58fc8678f1d2f9f5c48ff08', 'pjc-lock-5f585198c58fc8678f1d2f9f5c48ff08']))
+                ->willReturn([(base64_encode(serialize($cachedPage))), false]);
+
+            $this->redisMock
+                ->get($key)
+                ->willReturn(base64_encode(serialize($cachedPage)));
+        }
         $rawResult = $redis->get($key);
         assert($rawResult !== null, 'Raw result is null, probably not saved');
 
         $cacheReader = new \RedisPageCache\Service\CacheReader($request, $redis);
         $results = $cacheReader->checkRequest();
-        $compressor = new GzipCompressor();
+
         assert(is_array($results), "result is not an array");
         assert(property_exists($results['cache'], 'output'), "result doesn't have an 'output' property");
 
@@ -140,7 +166,17 @@ describe('CacheManager', function () {
          $this->cacheManager->setFcgiRegenerate(false);
          $this->cacheManager->setGzip(false);
          $this->cacheManager->outputBuffer("example content");
+         if ($this->mocking) {
+             $cachedPage = new \RedisPageCache\Model\CachedPage("example content", 200);
 
+             $this->redisMock
+                 ->mget(Argument::exact(['pjc-5f585198c58fc8678f1d2f9f5c48ff08', 'pjc-lock-5f585198c58fc8678f1d2f9f5c48ff08']))
+                 ->willReturn([(base64_encode(serialize($cachedPage))), false]);
+
+             $this->redisMock
+                 ->get($key)
+                 ->willReturn(base64_encode(serialize($cachedPage)));
+         }
          $rawResult = $redis->get($key);
          assert($rawResult !== null, 'Raw result is null, probably not saved');
 
