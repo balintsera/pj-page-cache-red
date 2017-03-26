@@ -8,12 +8,15 @@ use RedisPageCache\Service\WPCompat;
 
 class CacheManagerFactory
 {
-    public static function getManager()
+    public static function getManager($redisClient = null)
     {
-        $redisClient = ClientFactory::create([
-            'server' => '127.0.0.1:6379',
-            'timeout' => 2,
-        ]);
+        if (!$redisClient) {
+            $redisClient = ClientFactory::create([
+                'server' => '127.0.0.1:6379',
+                'timeout' => 2,
+            ]);
+        }
+
         
         $cacheManager = new CacheManager(new WPCompat, new GzipCompressor, $redisClient);
         return $cacheManager;

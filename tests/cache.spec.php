@@ -11,19 +11,21 @@ use Prophecy\Argument;
 
 describe('CacheManager', function () {
     beforeEach(function () {
-        $this->cacheManager = CacheManagerFactory::getManager();
+
         $this->mocking = true;
-        $this->redisClient = ClientFactory::create([
-            'server' => '127.0.0.1:6379', // or 'unix:///tmp/redis.sock'
-            'timeout' => 2,
-        ]);
 
         // Mocking redis
         if ($this->mocking) {
             $this->redisMock = $this->getProphet()->prophesize('RedisClient\Client\Version\RedisClient3x2');
             $this->redisClient = $this->redisMock->reveal();
+        } else {
+            $this->redisClient = ClientFactory::create([
+                'server' => '127.0.0.1:6379', // or 'unix:///tmp/redis.sock'
+                'timeout' => 2,
+            ]);
         }
 
+        $this->cacheManager = CacheManagerFactory::getManager($this->redisClient);
     });
 
     it('should accept redis client as dependency', function () {
@@ -115,7 +117,6 @@ describe('CacheManager', function () {
             'GET'
         );
         // We need a brand new manager
-        $this->cacheManager = CacheManagerFactory::getManager();
         $this->cacheManager->setGzip(true);
         $this->cacheManager->setRequest($request);
         $defaultKey = KeyFactory::getKey(KeyFactory::TYPE_DEFAULT, $request);
@@ -157,7 +158,7 @@ describe('CacheManager', function () {
              'GET'
          );
          // We need a brand new manager
-         $this->cacheManager = CacheManagerFactory::getManager();
+         //$this->cacheManager = CacheManagerFactory::getManager();
          $this->cacheManager->setRequest($request);
          $defaultKey = KeyFactory::getKey(KeyFactory::TYPE_DEFAULT, $request);
          $key = $defaultKey->get();

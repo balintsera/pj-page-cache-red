@@ -2,11 +2,7 @@
 
 A Redis-backed full page caching plugin for WordPress, extremely flexible and fast. Requires a running [Redis server](http://redis.io/), a Redis client package (currently only [cheprasov/php-redis-client](https://packagist.org/packages/cheprasov/php-redis-client) is supported), and [Composer](http://http://getcomposer.org)
 
-[![Latest Version on Packagist][ico-version]][link-packagist]
-
-[![Build Status](https://travis-ci.org/balintsera/pj-page-cache-red.svg?branch=master)](https://travis-ci.org/balintsera/pj-page-cache-red)
-
-[![Total Downloads][ico-downloads]][link-downloads]
+[![Latest Version on Packagist][ico-version]][link-packagist]  [![Build Status](https://travis-ci.org/balintsera/pj-page-cache-red.svg?branch=master)](https://travis-ci.org/balintsera/pj-page-cache-red)  [![Total Downloads][ico-downloads]][link-downloads]
 
 ## Requirements
 
