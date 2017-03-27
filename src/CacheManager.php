@@ -253,7 +253,7 @@ class CacheManager
      */
     public function outputBuffer($output): string
     {
-        error_log('request in output buffer: ' . print_r($this->request, true), 4);
+        //error_log('request in output buffer: ' . print_r($this->request, true), 4);
         $responseCode = http_response_code();
         // Don't cache 5xx errors.
         if ($responseCode >= 500) {
@@ -287,7 +287,7 @@ class CacheManager
         //error_log('cached page ' . print_r($cachedPage, true), 4);
         // Ignore requests with cookie = don't cache
         if (in_array(Request::IGNORECOOKIES, $cookies)) {
-            error_log('remove from cache: ' . $cacheWriter->getKey()->get(), 4);
+            //error_log('remove from cache: ' . $cacheWriter->getKey()->get(), 4);
             $cacheWriter->remove();
             return $output;
         }
@@ -297,10 +297,10 @@ class CacheManager
         }
 
         if (!$this->fcgi_regenerate) {
-            error_log('added to cache (no fcgi_regenerate): ' . $cacheWriter->getKey()->get(), 4);
+            //error_log('added to cache (no fcgi_regenerate): ' . $cacheWriter->getKey()->get(), 4);
             $cacheWriter->add();
         }
-        error_log('output buffer ran, key: ' . $cacheWriter->getKey()->get(), 4);
+        //error_log('output buffer ran, key: ' . $cacheWriter->getKey()->get(), 4);
         return $output;
     }
 
