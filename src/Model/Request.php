@@ -23,6 +23,9 @@ class Request
     const IGNORECOOKIES = array('wordpress_test_cookie');
     private $whitelistCookies = null;
     private $wp;
+    private $postID;
+    private $blogID;
+    private $feedID;
 
     public function __construct(string $requestURI = null, string $host = null, string $https = null, string $method = null, array $cookies = null, WPCompat $wp = null)
     {
@@ -222,5 +225,65 @@ class Request
             }
         }
     }
+
+    /**
+     * @return mixed
+     */
+    public function getPostID()
+    {
+        return $this->postID;
+    }
+
+    /**
+     * @param mixed $postID
+     * @return Request
+     */
+    public function setPostID($postID)
+    {
+        $this->postID = $postID;
+
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getFeedID()
+    {
+        return $this->feedID;
+    }
+
+    /**
+     * @param mixed $feedID
+     * @return Request
+     */
+    public function setFeedID($feedID)
+    {
+        $this->feedID = $feedID;
+
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getBlogID()
+    {
+        return $this->blogID;
+    }
+
+    /**
+     * @param mixed $blogID
+     * @return Request
+     */
+    public function setBlogID($blogID)
+    {
+        $this->blogID = $blogID;
+
+        return $this;
+    }
+
+
+    
 
 }
