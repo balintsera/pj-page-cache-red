@@ -141,7 +141,7 @@ class CachedPage
     public function __sleep()
     {
         return [
-            'output', 'headers', 'status', 'flags', 'updated', 'debugData'
+            'output', 'headers', 'status', 'flags', 'updated', 'debugData', 'gzip'
         ];
     }
 
