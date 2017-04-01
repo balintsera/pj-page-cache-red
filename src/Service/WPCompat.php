@@ -84,4 +84,20 @@ class WPCompat
         $GLOBALS['wp_filter'][$name][$priority]['pj-page-cache'] = array(
             'function' => $args, 'accepted_args' => $num );
     }
+
+    /**
+     * @return mixed
+     */
+    public function getDB()
+    {
+        if (defined('REDIS_DB')) {
+            return REDIS_DB;
+        }
+
+        return 1;
+    }
+
+
+
+
 }
