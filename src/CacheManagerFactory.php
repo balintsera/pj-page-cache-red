@@ -10,15 +10,17 @@ class CacheManagerFactory
 {
     public static function getManager($redisClient = null)
     {
+        $wp = new WPCompat();
         if (!$redisClient) {
             $redisClient = ClientFactory::create([
-                'server' => '127.0.0.1:6379',
+                'server' => $wp->getRedisHost() . ':' . $wp->getRedisPort(),
                 'timeout' => 2,
+                'database' => $wp->getDB(),
             ]);
         }
 
         
-        $cacheManager = new CacheManager(new WPCompat, new GzipCompressor, $redisClient);
+        $cacheManager = new CacheManager($wp, new GzipCompressor, $redisClient);
         return $cacheManager;
     }
 }
