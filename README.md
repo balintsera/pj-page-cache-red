@@ -35,15 +35,18 @@ Enable page caching in your WordPress wp-config.php file with a constant:
 
 ```
 define( 'WP_CACHE', true );
+define('REDIS_CACHE', true);
 ```
 
-Set up vendor folder path in wp-config.php file with a constant:
+Set up some important Redis options (both has defaults):
 
-```
-define( 'VENDOR', '/var/www/path/to/vendor' );
+```php
+define('REDIS_CACHE_TTL', 3000);
+define('REDIS_DB', 10);
+define('REDIS_HOST', getenv('REDIS_HOST') ?: '127.0.0.1');
+define('REDIS_PORT', getenv('REDIS_PORT') ?: 6379);
 ```
 
-If omitted, the plugin will try to load autoload.php from the default ../vendor/ dir.
 
 Try visiting your site in incognito mode or cURL, you should see an X-Pj-Cache- header:
 
@@ -106,7 +109,7 @@ Note that all the clear cache methods expire (but don't delete) cache by default
 
 ## Support
 
-If you need help installing and configuring this plugin, feel free to reach out to us via e-mail: support@pressjitsu.com.
+If you need help installing and configuring this plugin, feel free to reach out to us via e-mail: sera.balint@e-vista.hu.
 
 
 [ico-downloads]: https://img.shields.io/packagist/dt/evista/pj-page-cache-red.svg?style=flat-square

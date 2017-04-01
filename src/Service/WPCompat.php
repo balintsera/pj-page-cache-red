@@ -97,6 +97,25 @@ class WPCompat
         return 1;
     }
 
+    public function getRedisHost()
+    {
+        if (defined('REDIS_HOST')) {
+            return REDIS_HOST;
+        }
+
+        return '127.0.0.1';
+    }
+
+    public function getRedisPort()
+    {
+        if (defined('REDIS_PORT')) {
+            return REDIS_PORT;
+        }
+
+        return '6379';
+    }
+
+
 
 
 
