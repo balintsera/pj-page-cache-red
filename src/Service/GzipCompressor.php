@@ -24,7 +24,6 @@ class GzipCompressor implements Compressable
 
     public function deCompress(string $compressed): string
     {
-        var_dump('compressed', $compressed);
         return gzuncompress($compressed);
     }
 }
