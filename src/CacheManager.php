@@ -35,6 +35,8 @@ class CacheManager
     private $expireFlags;
     private $deleteFlags;
 
+    private $cachedPage;
+
     private $disable = false;
 
     public function __construct(WPCompat $wp, Compressable $compressor, $redisClient = \Redis)
@@ -154,20 +156,7 @@ class CacheManager
                 }
             }
         }
-
-        if (!$deleted && $cache->isGzip()) {
-            error_log('!deleted and gzipped');
-            if ($cache->isGzip()) {
-                if ($this->debug) {
-                    header('X-Pj-Cache-Gzip: true');
-                }
-
-                 $cache->setOutput($this->compressor->deCompress($cache->getOutput()));
-            } else {
-                $serve_cache = false;
-            }
-        }
-        error_log('servce cache? '.$serve_cache);
+        error_log('servce cache? '.$serve_cache, 4);
         // serve the cached page
         if ($serve_cache) {
             // If we're regenareting in background, let everyone know.
@@ -175,6 +164,13 @@ class CacheManager
             header('X-Pj-Cache-Status: '.$status);
             if ($this->debug) {
                 header(sprintf('X-Pj-Cache-Expires: %d', $this->ttl - (time() - $cache->getUpdated())));
+            }
+            if ($cache->isGzip()) {
+                if ($this->debug) {
+                    header('X-Pj-Cache-Gzip: true');
+                }
+
+                $cache->setOutput($this->compressor->deCompress($cache->getOutput()));
             }
             // Actually send headers and echo content
 
@@ -262,11 +258,23 @@ class CacheManager
 
         $cachedPage = new CachedPage($output, $responseCode);
 
+        $requestFlags = [
+            'url:' . $this->request->getUri()
+        ];
+
+        if (null !== $this->request->getFeedID()) {
+            $requestFlags[] = $this->request->getFeedID();
+        }
+
+        if (null !== $this->request->getPostID()) {
+            $requestFlags[] = $this->request->getPostID();
+        }
+
         $cachedPage->setFlags(
             array_merge(
                 $this->expireFlags->getAll(),
                 $this->deleteFlags->getAll(),
-                ['url:'.$this->request->getUri()]
+                $requestFlags
             )
         );
 
@@ -275,6 +283,9 @@ class CacheManager
             $cachedPage
                 ->setOutput($this->compressor->compress($cachedPage->getOutput()))
                 ->setGzip(true);
+            if ($this->debug) {
+                header('X-Pj-Cache-Gzip-OnSave: true');
+            }
         }
 
         // Clean up headers he don't want to store.
@@ -324,14 +335,19 @@ class CacheManager
      */
     public function template_redirect()
     {
+        if (!$this->request) {
+            error_log('no request when trying to set post and feed flags', 4);
+            return;
+        }
         $blog_id = get_current_blog_id();
 
         if (is_singular()) {
-            $this->flag(sprintf('post:%d:%d', $blog_id, get_queried_object_id()));
+            $this->request->setBlogID($blog_id);
+            $this->request->setPostID(get_queried_object_id());
         }
 
         if (is_feed()) {
-            $this->flag(sprintf('feed:%d', $blog_id));
+            $this->request->setFeedID($blog_id);
         }
     }
 
