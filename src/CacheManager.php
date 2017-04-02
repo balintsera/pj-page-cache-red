@@ -284,6 +284,7 @@ class CacheManager
 
         /** @var TYPE_NAME $cachedPage */
         $cacheWriter = new CacheWriter($cachedPage, $this->request, $this->redisClient);
+        $cacheWriter->setTtl($this->ttl);
         //error_log('cached page ' . print_r($cachedPage, true), 4);
         // Ignore requests with cookie = don't cache
         if (in_array(Request::IGNORECOOKIES, $cookies)) {

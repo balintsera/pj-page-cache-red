@@ -37,7 +37,7 @@ class CacheWriter
     {
         $this->redisClient->multi();
         // Okay to cache.
-        error_log('serialized' . print_r($this->safeSerialized, true), 4);
+        //error_log('serialized' . print_r($this->safeSerialized, true), 4);
         $this->redisClient->set($this->key->get(), $this->safeSerialized, [$this->ttl]);
         $this->finalize();
     }
@@ -86,6 +86,25 @@ class CacheWriter
     public function getKey(): \RedisPageCache\Model\Keyable
     {
         return $this->key;
+    }
+
+    /**
+     * @return int
+     */
+    public function getTtl(): int
+    {
+        return $this->ttl;
+    }
+
+    /**
+     * @param int $ttl
+     * @return CacheWriter
+     */
+    public function setTtl(int $ttl): CacheWriter
+    {
+        $this->ttl = $ttl;
+
+        return $this;
     }
 
 

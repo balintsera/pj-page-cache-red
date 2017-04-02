@@ -18,7 +18,7 @@ class Flags
 
     public function getFromWithScores(int $from)
     {
-        error_log("flags from: " . print_r($from, true), 4);
+        //error_log("flags from: " . print_r($from, true), 4);
         $this->flagsFrom = $this->redisClient->zRangeByScore($this->key, $from, '+inf', [ 'withscores' => true ]);
 
         //error_log(print_r($this->flagsFrom, true), 4);
